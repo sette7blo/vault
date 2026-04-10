@@ -1675,14 +1675,6 @@ const STARTER_TEMPLATES=[
   {id:'t_prism',    name:'Prism',    col1:'#1a1a7e',col2:'#5b21b6',bgMode:'gradient',gradDir:'↘',textColor:'light',fontStyle:'bold',  pattern:'prism'},
   {id:'t_obsidian', name:'Obsidian', col1:'#1e293b',col2:'#334155',bgMode:'gradient',gradDir:'↘',textColor:'light',fontStyle:'normal',pattern:'mesh'},
 ];
-const STARTER_CARDS=[
-  {tmplId:'t_aurora',   card_number:'6042381927364850',   pin:'7391',balance:175.50,nickname:'Monthly spend'},
-  {tmplId:'t_aurora',   card_number:'5019283746152837',   pin:'2847',balance:80.00, nickname:'Travel'},
-  {tmplId:'t_prism',    card_number:'6006497011695818466',pin:'5512',balance:100.00,nickname:'Entertainment'},
-  {tmplId:'t_obsidian', card_number:'6042000011223344',   pin:'1234',balance:250.00,nickname:'Quarterly fund'},
-  {tmplId:'t_obsidian', card_number:'5019000099887766',   pin:'5566',balance:60.00, nickname:'Dining'},
-];
-
 (async()=>{
   try{
     await loadAll();
@@ -1691,12 +1683,9 @@ const STARTER_CARDS=[
     toast('Could not connect to server — check console');
   }
   if(!templates.length){
-    // Seed starter data on first run
+    // Seed starter templates on first run
     for(const t of STARTER_TEMPLATES){
       try{ const r=await api('POST','/api/templates',t); templates.push(normT(r)); }catch(e){console.error('Seed template failed:',e);}
-    }
-    for(const c of STARTER_CARDS){
-      try{ const r=await api('POST','/api/cards',c); cards.unshift(normC(r)); }catch(e){console.error('Seed card failed:',e);}
     }
   }
   const fg=groupCards()[0]; if(fg) openGroups.add(fg[0]);
