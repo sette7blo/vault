@@ -9,6 +9,10 @@ Versions follow [Semantic Versioning](https://semver.org): `MAJOR.MINOR.PATCH`
 
 ---
 
+## [Unreleased]
+
+---
+
 ## [v1.1.0] — 2026-04-10
 ### Added
 - PDF417 barcode format support (selectable per card at creation time)
