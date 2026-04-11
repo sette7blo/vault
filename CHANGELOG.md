@@ -35,3 +35,9 @@ Versions follow [Semantic Versioning](https://semver.org): `MAJOR.MINOR.PATCH`
 - 9 card pattern overlays
 - Docker image published to Docker Hub (`dockersette/vault`)
 - Fresh installs start with zero cards
+
+---
+
+[Unreleased]: https://github.com/sette7blo/vault/compare/v1.1.0...HEAD
+[v1.1.0]: https://github.com/sette7blo/vault/compare/v1.0.0...v1.1.0
+[v1.0.0]: https://github.com/sette7blo/vault/releases/tag/v1.0.0
