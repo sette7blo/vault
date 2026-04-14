@@ -11,6 +11,9 @@ Versions follow [Semantic Versioning](https://semver.org): `MAJOR.MINOR.PATCH`
 
 ## [Unreleased]
 
+### Changed
+- CI workflow now bakes `VERSION` file into the Docker image on tagged releases
+
 ---
 
 ## [v1.1.0] — 2026-04-10
