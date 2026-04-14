@@ -1091,7 +1091,16 @@ function drawBarcode(svgEl, canvasEl, value, format){
     } catch(e){canvasEl.style.display='none';}
   } else {
     canvasEl.style.display='none'; svgEl.style.display='block';
-    try{JsBarcode(svgEl,value,{format:'CODE128',lineColor:'#000000',background:'#ffffff',width:1,height:80,displayValue:false,margin:0});}
+    try{
+      JsBarcode(svgEl,value,{format:'CODE128',lineColor:'#000000',background:'#ffffff',width:2,height:80,displayValue:false,margin:10});
+      // Stretch bars to fill container width while keeping height fixed
+      const vb=svgEl.getAttribute('viewBox');
+      svgEl.removeAttribute('width');
+      svgEl.setAttribute('height','80');
+      svgEl.setAttribute('preserveAspectRatio','none');
+      svgEl.style.width='100%';
+      svgEl.style.height='80px';
+    }
     catch(e){svgEl.innerHTML='';}
   }
 }
