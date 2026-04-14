@@ -1092,7 +1092,7 @@ function drawBarcode(svgEl, canvasEl, value, format){
   } else {
     canvasEl.style.display='none'; svgEl.style.display='block';
     const displayText=value.replace(/(.{4})/g,'$1 ').trim();
-    try{JsBarcode(svgEl,value,{format:'CODE128',lineColor:'#000000',background:'#ffffff',width:2,height:68,displayValue:true,text:displayText,fontSize:11,font:'Nunito Sans,sans-serif',textMargin:5,margin:4});}
+    try{JsBarcode(svgEl,value,{format:'CODE128',lineColor:'#000000',background:'#ffffff',width:1,height:68,displayValue:true,text:displayText,fontSize:11,font:'Nunito Sans,sans-serif',textMargin:5,margin:4});}
     catch(e){svgEl.innerHTML='';}
   }
 }
