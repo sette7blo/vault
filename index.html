@@ -15,6 +15,7 @@
 <meta name="theme-color" content="#1565C0">
 <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.0/dist/JsBarcode.all.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bwip-js@3/dist/bwip-js-min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
@@ -291,6 +292,7 @@ body {
 }
 .scan-panel svg { width: 100%; display: block; }
 .scan-panel canvas { display: block; }
+.scan-img-btn { background: var(--accent-bg); border: none; border-radius: 8px; padding: 3px 9px; color: var(--accent); font-family: var(--font-s); font-size: 10px; font-weight: 700; letter-spacing: .5px; cursor: pointer; }
 .seg-ctrl { display: flex; gap: 0; border: 1.5px solid var(--rim); border-radius: 10px; overflow: hidden; }
 .seg-btn { flex: 1; padding: 9px 0; background: var(--surface); border: none; font-family: var(--font-s); font-size: 13px; font-weight: 600; color: var(--muted); cursor: pointer; transition: background .15s, color .15s; }
 .seg-btn.sel { background: var(--accent); color: #fff; }
@@ -898,8 +900,13 @@ body {
     <div class="sheet-title">Add a gift card</div>
     <div class="builder-label" style="margin-bottom:10px">Store</div>
     <div class="tmpl-pick-grid" id="tmpl-pick-grid"></div>
-    <div class="field"><label class="field-lbl">Card Number</label>
-      <input class="field-inp" id="in-num" type="text" inputmode="numeric" placeholder="0000 0000 0000 0000" maxlength="24"></div>
+    <div class="field">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span class="field-lbl" style="margin-bottom:0">Card Number</span>
+        <label class="scan-img-btn" for="scan-upload">Scan image</label>
+      </div>
+      <input type="file" id="scan-upload" accept="image/*" style="display:none" onchange="scanFromImage(this.files[0]);this.value=''">
+      <input class="field-inp" id="in-num" type="text" placeholder="0000 0000 0000 0000" maxlength="48"></div>
     <div class="field"><label class="field-lbl">PIN / NIP</label>
       <input class="field-inp" id="in-pin" type="text" inputmode="numeric" placeholder="0000" maxlength="8"></div>
     <div class="field"><label class="field-lbl">Barcode Format</label>
@@ -1080,19 +1087,24 @@ function makePattern(pid, tc){
 // ═══════════════════════════════
 function drawBarcode(svgEl, canvasEl, value, format){
   if(!value){svgEl.innerHTML='';svgEl.style.display='block';canvasEl.style.display='none';return;}
+  const len=(value||'').length;
+  const panel=svgEl.closest?svgEl.closest('.scan-panel'):null;
   if((format||'code128')==='pdf417'){
     svgEl.style.display='none';
     canvasEl.style.width=''; canvasEl.style.height=''; canvasEl.style.display='block';
+    if(panel) panel.style.margin='';
     try{
       bwipjs.toCanvas(canvasEl,{bcid:'pdf417',text:value,scale:3,height:26,columns:4,includetext:false,padding:3});
-      // Force the exact aspect ratio measured from the reference PNG (947×543 px @ 3×)
       canvasEl.style.width='100%';
       requestAnimationFrame(()=>{ canvasEl.style.height=Math.round(canvasEl.offsetWidth/1.744)+'px'; });
     } catch(e){canvasEl.style.display='none';}
   } else {
     canvasEl.style.display='none'; svgEl.style.display='block';
+    const w=Math.max(0.8,Math.floor(280/(len*11))*0.5);
+    const margin=Math.round(w*10);
+    if(panel) panel.style.margin=len>20?'0 8px':'';
     try{
-      JsBarcode(svgEl,value,{format:'CODE128B',lineColor:'#000000',background:'#ffffff',width:2,height:80,displayValue:false,margin:0});
+      JsBarcode(svgEl,value,{format:'CODE128',lineColor:'#000000',background:'#ffffff',width:w,height:80,displayValue:false,margin:margin});
       svgEl.setAttribute('preserveAspectRatio','none');
       svgEl.setAttribute('width','100%');
       svgEl.setAttribute('height','80');
@@ -1104,6 +1116,21 @@ function setAddFmt(fmt){
   selBarcodeFmt=fmt;
   document.getElementById('fmt-code128').classList.toggle('sel',fmt==='code128');
   document.getElementById('fmt-pdf417').classList.toggle('sel',fmt==='pdf417');
+}
+async function scanFromImage(file){
+  if(!file) return;
+  if(typeof Html5Qrcode==='undefined'){toast('Scanner not loaded yet, try again');return;}
+  let tmp=document.getElementById('_scan_tmp');
+  if(!tmp){tmp=document.createElement('div');tmp.id='_scan_tmp';tmp.style.display='none';document.body.appendChild(tmp);}
+  const scanner=new Html5Qrcode('_scan_tmp');
+  try{
+    const r=await scanner.scanFileV2(file,false);
+    document.getElementById('in-num').value=r.decodedText;
+    const fmtName=(r.result&&r.result.format&&r.result.format.formatName)||'';
+    setAddFmt(fmtName.includes('PDF')?'pdf417':'code128');
+  }catch(e){
+    toast('No barcode found in image');
+  }
 }
 
 // ═══════════════════════════════
@@ -1666,8 +1693,13 @@ let tt;
 function toast(msg){const el=document.getElementById('toast');el.textContent=msg;el.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>el.classList.remove('show'),2600);}
 
 document.getElementById('in-num').addEventListener('input',function(){
-  let v=this.value.replace(/\D/g,'').slice(0,19);
-  this.value=v.replace(/(.{4})/g,'$1 ').trim();
+  let v=this.value.replace(/\s/g,'');
+  if(/^\d+$/.test(v)){
+    v=v.slice(0,32);
+    this.value=v.replace(/(.{4})/g,'$1 ').trim();
+  } else {
+    this.value=v.slice(0,40);
+  }
 });
 document.getElementById('b-col1').addEventListener('input',function(){bState.col1=this.value;document.getElementById('b-col1-hex').value=this.value;updatePreview();});
 document.getElementById('b-col2').addEventListener('input',function(){bState.col2=this.value;document.getElementById('b-col2-hex').value=this.value;updatePreview();});
