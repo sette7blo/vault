@@ -1428,7 +1428,7 @@ function openAdd(){
 }
 
 async function addCard(){
-  const num=document.getElementById('in-num').value.replace(/\s/g,'');
+  const num=document.getElementById('in-num').value.trim();
   if(!num){document.getElementById('in-num').focus();return;}
   if(!selTmplId){toast('Select a store first');return;}
   const btn=document.getElementById('btn-add-ok'); btn.disabled=true; btn.textContent='Saving…';
