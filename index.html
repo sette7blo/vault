@@ -1093,13 +1093,11 @@ function drawBarcode(svgEl, canvasEl, value, format){
     canvasEl.style.display='none'; svgEl.style.display='block';
     try{
       JsBarcode(svgEl,value,{format:'CODE128',lineColor:'#000000',background:'#ffffff',width:2,height:80,displayValue:false,margin:10});
-      // Stretch bars to fill container width while keeping height fixed
-      const vb=svgEl.getAttribute('viewBox');
+      // Scale proportionally to fill container width — remove fixed dimensions so CSS takes over
       svgEl.removeAttribute('width');
-      svgEl.setAttribute('height','80');
-      svgEl.setAttribute('preserveAspectRatio','none');
+      svgEl.removeAttribute('height');
       svgEl.style.width='100%';
-      svgEl.style.height='80px';
+      svgEl.style.height='auto';
     }
     catch(e){svgEl.innerHTML='';}
   }
